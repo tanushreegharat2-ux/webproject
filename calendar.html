@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="en" style="height: 100%;">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Calendar</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: 'Raleway', sans-serif;
+    }
+    
+    body {
+      box-sizing: border-box;
+    }
+    
+    .app-wrapper {
+      height: 100%;
+      width: 100%;
+      overflow: auto;
+      background: linear-gradient(135deg, #1a0b2e 0%, #2d1b69 50%, #4a148c 100%);
+      padding: 2rem 1.5rem;
+    }
+    
+    .calendar-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .calendar-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .calendar-title {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+    }
+    
+    .calendar-subtitle {
+      font-size: 1.125rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 1s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .nav-btn {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      font-family: 'Raleway', sans-serif;
+    }
+    
+    .nav-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.5);
+    }
+    
+    .current-month {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    
+    .calendar-grid {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: slideUp 1s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .weekday-row {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .weekday {
+      text-align: center;
+      font-weight: 700;
+      color: #94a3b8;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0.5rem;
+    }
+    
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1rem;
+    }
+    
+    .day-cell {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .day-cell:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(124, 58, 237, 0.5);
+      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+    }
+    
+    .day-cell.empty {
+      background: transparent;
+      border: none;
+      cursor: default;
+    }
+    
+    .day-cell.empty:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .day-number {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+    
+    .day-cell.today {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      border-color: transparent;
+      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.6);
+    }
+    
+    .day-cell.today:hover {
+      transform: scale(1.15);
+    }
+    
+    .day-cell.has-event::after {
+      content: '';
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+    
+    @keyframes pulse-dot {
+      0%, 100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: translateX(-50%) scale(1.3);
+      }
+    }
+    
+    .event-detail {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .event-detail-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+    
+    .event-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .event-item {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
+      border-left: 4px solid #a78bfa;
+      transition: transform 0.2s;
+    }
+    
+    .event-item:hover {
+      transform: translateX(5px);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .event-name {
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+    
+    .event-time {
+      font-size: 0.875rem;
+      color: #94a3b8;
+    }
+    
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #94a3b8;
+      font-size: 0.875rem;
+    }
+    
+    .legend-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+    }
+    
+    .legend-dot.today {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    }
+    
+    .legend-dot.event {
+      background: #22d3ee;
+    }
+    
+    @media (max-width: 768px) {
+      .app-wrapper {
+        padding: 1rem;
+      }
+      
+      .calendar-title {
+        font-size: 2rem;
+      }
+      
+      .calendar-nav {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .days-grid {
+        gap: 0.5rem;
+      }
+      
+      .day-number {
+        font-size: 1rem;
+      }
+      
+      .weekday {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body style="height: 100%;">
+  <div class="app-wrapper">
+   <div class="calendar-container">
+    <div class="calendar-header">
+     <h1 id="page-title" class="calendar-title">Events Calendar</h1>
+     <p id="page-subtitle" class="calendar-subtitle">Stay organized with all your campus events</p>
+    </div>
+    <div class="calendar-nav"><button class="nav-btn" id="prev-month">← Previous</button>
+     <div class="current-month" id="current-month"></div><button class="nav-btn" id="next-month">Next →</button>
+    </div>
+    <div class="calendar-grid">
+     <div class="weekday-row">
+      <div class="weekday">
+       Sun
+      </div>
+      <div class="weekday">
+       Mon
+      </div>
+      <div class="weekday">
+       Tue
+      </div>
+      <div class="weekday">
+       Wed
+      </div>
+      <div class="weekday">
+       Thu
+      </div>
+      <div class="weekday">
+       Fri
+      </div>
+      <div class="weekday">
+       Sat
+      </div>
+     </div>
+     <div class="days-grid" id="days-grid"></div>
+    </div>
+    <div class="event-detail" id="event-detail" style="display: none;">
+     <div class="event-detail-title" id="selected-date"></div>
+     <div class="event-list" id="event-list"></div>
+    </div>
+    <div class="legend">
+     <div class="legend-item">
+      <div class="legend-dot today"></div><span>Today</span>
+     </div>
+     <div class="legend-item">
+      <div class="legend-dot event"></div><span>Has Events</span>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Sample events data
+    const events = {
+      '2025-03-15': [
+        { name: 'Spring Music Festival', time: '7:00 PM', location: 'Main Quad' }
+      ],
+      '2025-03-20': [
+        { name: 'Jazz Night', time: '7:00 PM', location: 'Student Union' }
+      ],
+      '2025-03-22': [
+        { name: 'Basketball Championship', time: '6:00 PM', location: 'Sports Complex' }
+      ],
+      '2025-03-24': [
+        { name: 'AI Workshop', time: '2:00 PM', location: 'Tech Building' },
+        { name: 'Career Fair', time: '10:00 AM', location: 'Convention Center' }
+      ],
+      '2025-03-25': [
+        { name: 'Food Festival', time: '11:00 AM', location: 'Main Quad' }
+      ],
+      '2025-03-27': [
+        { name: 'Open Mic Night', time: '8:00 PM', location: 'Coffee House' }
+      ],
+      '2025-03-29': [
+        { name: 'Hackathon Start', time: '9:00 AM', location: 'Innovation Hub' }
+      ]
+    };
+
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    function renderCalendar() {
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+
+      document.getElementById('current-month').textContent = 
+        `${monthNames[currentMonth]} ${currentYear}`;
+
+      const daysGrid = document.getElementById('days-grid');
+      daysGrid.innerHTML = '';
+
+      // Empty cells before first day
+      for (let i = 0; i < startingDayOfWeek; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'day-cell empty';
+        daysGrid.appendChild(emptyCell);
+      }
+
+      // Days of the month
+      const today = new Date();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'day-cell';
+        
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        
+        // Check if today
+        if (day === today.getDate() && 
+            currentMonth === today.getMonth() && 
+            currentYear === today.getFullYear()) {
+          dayCell.classList.add('today');
+        }
+        
+        // Check if has events
+        if (events[dateStr]) {
+          dayCell.classList.add('has-event');
+        }
+        
+        const dayNumber = document.createElement('div');
+        dayNumber.className = 'day-number';
+        dayNumber.textContent = day;
+        
+        dayCell.appendChild(dayNumber);
+        
+        dayCell.addEventListener('click', () => showEventDetail(dateStr, day));
+        
+        daysGrid.appendChild(dayCell);
+      }
+    }
+
+    function showEventDetail(dateStr, day) {
+      const eventDetail = document.getElementById('event-detail');
+      const selectedDate = document.getElementById('selected-date');
+      const eventList = document.getElementById('event-list');
+      
+      selectedDate.textContent = `Events on ${monthNames[currentMonth]} ${day}, ${currentYear}`;
+      
+      if (events[dateStr]) {
+        eventList.innerHTML = events[dateStr].map(event => `
+          <div class="event-item">
+            <div class="event-name">${event.name}</div>
+            <div class="event-time">${event.time} • ${event.location}</div>
+          </div>
+        `).join('');
+        eventDetail.style.display = 'block';
+      } else {
+        eventList.innerHTML = '<div class="event-item"><div class="event-name">No events scheduled</div></div>';
+        eventDetail.style.display = 'block';
+      }
+    }
+
+    document.getElementById('prev-month').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    });
+
+    document.getElementById('next-month').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    });
+
+    // Default configuration
+    const defaultConfig = {
+      page_title: "📅 Campus Calendar",
+      page_subtitle: "Stay organized with all your campus events",
+      background_color: "#1a0b2e",
+      text_color: "#ffffff",
+      primary_color: "#7c3aed",
+      accent_color: "#22d3ee"
+    };
+
+    // Config change handler
+    async function onConfigChange(config) {
+      const pageTitle = document.getElementById('page-title');
+      const pageSubtitle = document.getElementById('page-subtitle');
+      
+      pageTitle.textContent = config.page_title || defaultConfig.page_title;
+      pageSubtitle.textContent = config.page_subtitle || defaultConfig.page_subtitle;
+
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+
+      document.querySelector('.app-wrapper').style.background = 
+        `linear-gradient(135deg, ${bgColor} 0%, #2d1b69 50%, #4a148c 100%)`;
+      
+      document.querySelectorAll('.calendar-title, .event-detail-title, .event-name, .day-number, .current-month')
+        .forEach(el => el.style.color = textColor);
+
+      document.querySelectorAll('.nav-btn, .day-cell.today').forEach(el => {
+        el.style.background = `linear-gradient(135deg, ${primaryColor}, #a78bfa)`;
+      });
+    }
+
+    // Map to capabilities
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              window.elementSdk.setConfig({ accent_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    // Map to edit panel values
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["page_title", config.page_title || defaultConfig.page_title],
+        ["page_subtitle", config.page_subtitle || defaultConfig.page_subtitle]
+      ]);
+    }
+
+    // Initialize
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    renderCalendar();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bf46b94631c84aa',t:'MTc2ODYzNzg4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

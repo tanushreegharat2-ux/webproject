@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en" style="height: 100%;">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html {
+      height: 100%;
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0118;
+      color: #e8e8f0;
+      height: 100%;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    /* Canvas for animated background */
+    #background-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    .app-wrapper {
+      width: 100%;
+      min-height: 100%;
+      position: relative;
+      z-index: 3;
+    }
+    
+    /* Navigation */
+    .nav-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 1, 24, 0.8);
+      backdrop-filter: blur(30px);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+      padding: 24px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo-symbol {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: white;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .logo-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 48px;
+      list-style: none;
+    }
+    
+    .nav-links a {
+      font-size: 15px;
+      color: #a8a8b8;
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #8b5cf6, #ec4899);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-links a:hover {
+      color: #ffffff;
+    }
+    
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 140px 60px 100px;
+      position: relative;
+    }
+    
+    /* Floating orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.4;
+      animation: floatOrb 8s ease-in-out infinite;
+    }
+    
+    @keyframes floatOrb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+    
+    .orb-1 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+      top: 10%;
+      left: 5%;
+      animation-delay: 0s;
+    }
+    
+    .orb-2 {
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, #ec4899 0%, transparent 70%);
+      bottom: 15%;
+      right: 10%;
+      animation-delay: 3s;
+    }
+    
+    .orb-3 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+      top: 50%;
+      right: 5%;
+      animation-delay: 6s;
+    }
+    
+    .hero-content {
+      max-width: 1000px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-size: 13px;
+      color: #c4b5fd;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 32px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+    
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      background: #8b5cf6;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+    
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 96px;
+      color: #ffffff;
+      font-weight: 700;
+      letter-spacing: -3px;
+      margin-bottom: 24px;
+      line-height: 1;
+      animation: fadeInUp 1s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .hero-subtitle {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 48px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      letter-spacing: -2px;
+      margin-bottom: 32px;
+      animation: fadeInUp 1.2s ease-out;
+    }
+    
+    .hero-tagline {
+      font-size: 20px;
+      color: #a8a8b8;
+      font-weight: 400;
+      line-height: 1.7;
+      max-width: 700px;
+      margin: 0 auto 48px;
+      animation: fadeIn 1.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: #ffffff;
+      border: none;
+      padding: 18px 42px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      animation: fadeIn 1.8s ease-out;
+      box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+    }
+    
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    .hero-cta:hover::before {
+      left: 100%;
+    }
+    
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 48px rgba(139, 92, 246, 0.5);
+    }
+    
+    .hero-cta-arrow {
+      font-size: 20px;
+      transition: transform 0.3s ease;
+    }
+    
+    .hero-cta:hover .hero-cta-arrow {
+      transform: translateX(4px);
+    }
+    
+    /* Quick Links Section */
+    .quick-links-section {
+      padding: 80px 60px;
+      background: rgba(15, 5, 30, 0.5);
+      border-top: 1px solid rgba(139, 92, 246, 0.1);
+    }
+    
+    .quick-links-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    
+    .quick-link-card {
+      background: rgba(20, 10, 35, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .quick-link-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .quick-link-card:hover::before {
+      opacity: 1;
+    }
+    
+    .quick-link-card:hover {
+      border-color: rgba(139, 92, 246, 0.4);
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba(139, 92, 246, 0.2);
+    }
+    
+    .quick-link-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: block;
+    }
+    
+    .quick-link-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      color: #ffffff;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .quick-link-desc {
+      font-size: 14px;
+      color: #a8a8b8;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+      padding: 100px 60px;
+      background: linear-gradient(180deg, rgba(15, 5, 30, 0.5) 0%, rgba(10, 1, 24, 0.8) 100%);
+    }
+    
+    .stats-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 60px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 64px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -2px;
+    }
+    
+    .stat-label {
+      font-size: 15px;
+      color: #a8a8b8;
+      font-weight: 500;
+    }
+    
+    /* Footer */
+    .footer-section {
+      background: rgba(10, 1, 24, 0.95);
+      border-top: 1px solid rgba(139, 92, 246, 0.1);
+      padding: 40px 60px;
+    }
+    
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: #6b6b7a;
+      font-weight: 400;
+    }
+    
+    .footer-text span {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .hero-title {
+        font-size: 72px;
+      }
+      
+      .hero-subtitle {
+        font-size: 36px;
+      }
+      
+      .quick-links-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .nav-bar {
+        padding: 20px 30px;
+      }
+      
+      .nav-links {
+        display: none;
+      }
+      
+      .hero-section {
+        padding: 120px 30px 60px;
+      }
+      
+      .hero-title {
+        font-size: 48px;
+      }
+      
+      .hero-subtitle {
+        font-size: 28px;
+      }
+      
+      .hero-tagline {
+        font-size: 16px;
+      }
+      
+      .quick-links-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+ 
+
+  <canvas id="background-canvas"></canvas>
+  <div class="app-wrapper"><!-- Navigation -->
+   <nav class="nav-bar">
+    <div class="logo-area">
+     <div class="logo-symbol">
+      C
+     </div>
+     <div class="logo-name">
+      Campus
+     </div>
+    </div>
+    <ul class="nav-links">
+     <li><a href="#main">Home</a></li>
+     <li><a href="Event.html">Events</a></li>
+     <li><a href="calendar.html">Calendar</a></li>
+     <li><a href="clubs.html">Clubs</a></li>
+     <li><a href="contact.html">Contact</a></li>
+    </ul>
+   </nav><!-- Hero Section -->
+   <section id="home" class="hero-section">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-content">
+     <div class="hero-badge"><span class="badge-dot"></span> Welcome to Campus Portal
+     </div>
+     <h1 class="hero-title" id="mainTitle">Your Campus,</h1>
+     <h2 class="hero-subtitle" id="subtitle">Reimagined</h2>
+     <p class="hero-tagline" id="tagline">Experience campus life like never before. Connect with clubs, discover events, and build your community—all in one beautiful, intuitive platform.</p><a href="#quick-links" class="hero-cta"> <span id="ctaButtonText">Get Started</span> <span class="hero-cta-arrow">→</span> </a>
+    </div>
+   </section><!-- Quick Links Section -->
+   <section id="quick-links" class="quick-links-section">
+    <div class="quick-links-container">
+     <div class="quick-link-card"><span class="quick-link-icon">📅</span>
+      <h3 class="quick-link-title">Events</h3>
+      <p class="quick-link-desc">Discover upcoming campus activities</p>
+     </div>
+     <div class="quick-link-card"><span class="quick-link-icon">🗓️</span>
+      <h3 class="quick-link-title">Calendar</h3>
+      <p class="quick-link-desc">Stay organized with your schedule</p>
+     </div>
+     <div class="quick-link-card"><span class="quick-link-icon">🎯</span>
+      <h3 class="quick-link-title">Clubs</h3>
+      <p class="quick-link-desc">Join communities that inspire you</p>
+     </div>
+     <div class="quick-link-card"><span class="quick-link-icon">💬</span>
+      <h3 class="quick-link-title">Contact</h3>
+      <p class="quick-link-desc">Get help whenever you need it</p>
+     </div>
+    </div>
+   </section><!-- Stats Section -->
+   <section class="stats-section">
+    <div class="stats-container">
+     <div class="stat-item">
+      <div class="stat-number">
+       1000+
+      </div>
+      <div class="stat-label">
+       Active Students
+      </div>
+     </div>
+     <div class="stat-item">
+      <div class="stat-number">
+       50+
+      </div>
+      <div class="stat-label">
+       Student Clubs
+      </div>
+     </div>
+     <div class="stat-item">
+      <div class="stat-number">
+       200+
+      </div>
+      <div class="stat-label">
+       Events Yearly
+      </div>
+     </div>
+     <div class="stat-item">
+      <div class="stat-number">
+       24/7
+      </div>
+      <div class="stat-label">
+       Portal Access
+      </div>
+     </div>
+    </div>
+   </section><!-- Footer -->
+   <footer class="footer-section">
+    <div class="footer-content">
+     <p class="footer-text">© 2025 Campus Portal. Built with <span>passion</span> for students.</p>
+    </div>
+   </footer>
+  </div>
+  <script>
+    // Animated Canvas Background
+    const canvas = document.getElementById('background-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    const particleCount = 150;
+    
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = Math.random() * 0.5 - 0.25;
+        this.speedY = Math.random() * 0.5 - 0.25;
+        this.color = this.getRandomColor();
+        this.opacity = Math.random() * 0.5 + 0.3;
+      }
+      
+      getRandomColor() {
+        const colors = [
+          'rgba(139, 92, 246,',  // purple
+          'rgba(236, 72, 153,',  // pink
+          'rgba(59, 130, 246,'   // blue
+        ];
+        return colors[Math.floor(Math.random() * colors.length)];
+      }
+      
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        
+        if (this.x > canvas.width) this.x = 0;
+        if (this.x < 0) this.x = canvas.width;
+        if (this.y > canvas.height) this.y = 0;
+        if (this.y < 0) this.y = canvas.height;
+      }
+      
+      draw() {
+        ctx.fillStyle = this.color + this.opacity + ')';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add glow effect
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color + '0.8)';
+      }
+    }
+    
+    // Create particles
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+    
+    // Connect nearby particles with lines
+    function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          if (distance < 120) {
+            ctx.strokeStyle = `rgba(139, 92, 246, ${0.15 * (1 - distance / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+    
+    // Animation loop
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Dark gradient background
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, '#0a0118');
+      gradient.addColorStop(0.5, '#1a0b2e');
+      gradient.addColorStop(1, '#0a0118');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Update and draw particles
+      for (let particle of particles) {
+        particle.update();
+        particle.draw();
+      }
+      
+      connectParticles();
+      requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+    
+    // Config
+    const defaultConfig = {
+      main_title: 'Your Campus,',
+      subtitle: 'Reimagined',
+      tagline: 'Experience campus life like never before. Connect with clubs, discover events, and build your community—all in one beautiful, intuitive platform.',
+      cta_button_text: 'Get Started',
+      primary_color: '#8b5cf6',
+      secondary_color: '#ec4899',
+      background_color: '#0a0118',
+      text_color: '#e8e8f0',
+      font_family: 'Inter',
+      font_size: 16
+    };
+    
+    let config = {...defaultConfig};
+    
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+    
+    // Element SDK
+    async function onConfigChange(newConfig) {
+      config = {...defaultConfig, ...newConfig};
+      
+      const mainTitle = document.getElementById('mainTitle');
+      if (mainTitle) mainTitle.textContent = config.main_title || defaultConfig.main_title;
+      
+      const subtitle = document.getElementById('subtitle');
+      if (subtitle) subtitle.textContent = config.subtitle || defaultConfig.subtitle;
+      
+      const tagline = document.getElementById('tagline');
+      if (tagline) tagline.textContent = config.tagline || defaultConfig.tagline;
+      
+      const ctaButtonText = document.getElementById('ctaButtonText');
+      if (ctaButtonText) ctaButtonText.textContent = config.cta_button_text || defaultConfig.cta_button_text;
+      
+      document.body.style.backgroundColor = config.background_color || defaultConfig.background_color;
+      document.body.style.color = config.text_color || defaultConfig.text_color;
+      
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `'${fontFamily}', sans-serif`;
+      
+      const baseSize = config.font_size || defaultConfig.font_size;
+      document.documentElement.style.fontSize = baseSize + 'px';
+    }
+    
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [
+          {
+            get: () => cfg.primary_color || defaultConfig.primary_color,
+            set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({primary_color: v}); }
+          },
+          {
+            get: () => cfg.secondary_color || defaultConfig.secondary_color,
+            set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({secondary_color: v}); }
+          },
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({background_color: v}); }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({text_color: v}); }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => cfg.font_family || defaultConfig.font_family,
+          set: (v) => { cfg.font_family = v; window.elementSdk.setConfig({font_family: v}); }
+        },
+        fontSizeable: {
+          get: () => cfg.font_size || defaultConfig.font_size,
+          set: (v) => { cfg.font_size = v; window.elementSdk.setConfig({font_size: v}); }
+        }
+      };
+    }
+    
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ['main_title', cfg.main_title || defaultConfig.main_title],
+        ['subtitle', cfg.subtitle || defaultConfig.subtitle],
+        ['tagline', cfg.tagline || defaultConfig.tagline],
+        ['cta_button_text', cfg.cta_button_text || defaultConfig.cta_button_text]
+      ]);
+    }
+    
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bf4dcf7c3cf3b3a',t:'MTc2ODY0MjUzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
